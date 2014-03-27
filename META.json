@@ -57,5 +57,16 @@
       }
    },
    "release_status" : "unstable",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/tsucchi/p5-Otogiri-Plugin-TableInfo/issues"
+      },
+      "homepage" : "https://github.com/tsucchi/p5-Otogiri-Plugin-TableInfo",
+      "repository" : {
+         "type" : "git",
+         "url" : "git://github.com/tsucchi/p5-Otogiri-Plugin-TableInfo.git",
+         "web" : "https://github.com/tsucchi/p5-Otogiri-Plugin-TableInfo"
+      }
+   },
    "version" : "0.01"
 }

@@ -1,4 +1,4 @@
-
+[![Build Status](https://travis-ci.org/tsucchi/p5-Otogiri-Plugin-TableInfo.png?branch=master)](https://travis-ci.org/tsucchi/p5-Otogiri-Plugin-TableInfo) [![Coverage Status](https://coveralls.io/repos/tsucchi/p5-Otogiri-Plugin-TableInfo/badge.png?branch=master)](https://coveralls.io/r/tsucchi/p5-Otogiri-Plugin-TableInfo?branch=master)
 # NAME
 
 Otogiri::Plugin::TableInfo - retrieve table information from database
