@@ -3,7 +3,7 @@ use warnings;
 use Test::More;
 use Otogiri;
 use Otogiri::Plugin;
-use List::MoreUtils qw(any);
+use List::MoreUtils qw(any none);
 #use DBIx::QueryLog;
 
 my $dbfile  = ':memory:';
@@ -31,11 +31,19 @@ CREATE TABLE detective (
 EOSQL
 $db->do($_) for @sql_statements;
 
+subtest 'show_tables(all)', sub {
+    my @result = $db->show_tables();
+    # @result contains system table.(sqlite_sequence)
+    ok( any { $_ eq 'detective' } @result );
+    ok( any { $_ eq 'person' }    @result );
+};
 
-my @result = $db->show_tables();
-# @result contains system table.(sqlite_sequence)
-ok( any { $_ eq 'detective' } @result );
-ok( any { $_ eq 'person' }    @result );
+subtest 'show_tables(with regex)', sub {
+    my @result = $db->show_tables(qr/pe/);
+    # @result contains system table.(sqlite_sequence)
+    ok( none { $_ eq 'detective' } @result );
+    ok( any { $_ eq 'person' }    @result );
+};
 
 
 done_testing;

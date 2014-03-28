@@ -12,10 +12,11 @@ our $VERSION = "0.01";
 our @EXPORT = qw(show_tables);
 
 sub show_tables {
-    my ($self) = @_;
+    my ($self, $like_regex) = @_;
     my $inspector = DBIx::Inspector->new(dbh => $self->dbh);
     my @tables = $inspector->tables;
     my @result = map { $_->name } $inspector->tables;
+    @result = grep { $_ =~ /$like_regex/ } @result if ( defined $like_regex );
     return @result;
 }
 
@@ -42,9 +43,15 @@ Otogiri::Plugin::TableInfo is Otogiri plugin to fetch table information from dat
 
 =head1 METHODS
 
-=head2 my @table_names = $self->show_tables();
+=head2 my @table_names = $self->show_tables([$like_regex]);
 
 returns table names in database.
+
+parameter C<$like_regex> is optional. If it is passed, table name is filtered by regex like MySQL's C<SHOW TABLES LIKE ...> statement.
+
+    my @table_names = $db->show_tables(qr/^user_/); # return table names that starts with 'user_'
+
+If C<$like_regex> is not passed, all table_names in current database are returned.
 
 =head1 LICENSE
 
