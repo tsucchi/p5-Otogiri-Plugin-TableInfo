@@ -32,10 +32,32 @@ EOSQL
 $db->do($_) for @sql_statements;
 
 
-my @result = $db->show_tables();
-# @result contains system table.(sqlite_sequence)
-ok( any { $_ eq 'detective' } @result );
-ok( any { $_ eq 'person' }    @result );
+subtest 'show_tables', sub {
+    my @result = $db->show_tables();
+    # @result contains system table.(sqlite_sequence)
+    ok( any { $_ eq 'detective' } @result );
+    ok( any { $_ eq 'person' }    @result );
+};
+
+subtest 'desc', sub {
+    my $result = $db->desc('detective');
+    my $expected = <<EOSQL;
+CREATE TABLE detective (
+  id        INTEGER PRIMARY KEY AUTOINCREMENT,
+  person_id INTEGER NOT NULL,
+  toys      TEXT  NOT NULL,
+  FOREIGN KEY(person_id) REFERENCES person(id)
+)
+EOSQL
+    $expected =~ s/\n$//; # trim last newline
+    is( $result, $expected );
+};
+
+subtest 'desc(table does not exist)', sub {
+    my $result = $db->desc('hoge');
+    is( $result, undef );
+};
+
 
 
 done_testing;

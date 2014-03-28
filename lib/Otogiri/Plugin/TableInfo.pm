@@ -9,7 +9,7 @@ use DBIx::Inspector;
 
 our $VERSION = "0.01";
 
-our @EXPORT = qw(show_tables);
+our @EXPORT = qw(show_tables desc);
 
 sub show_tables {
     my ($self) = @_;
@@ -18,6 +18,29 @@ sub show_tables {
     my @result = map { $_->name } $inspector->tables;
     return @result;
 }
+
+sub desc {
+    my ($self, $table_name) = @_;
+    my $inspector = DBIx::Inspector->new(dbh => $self->dbh);
+    my $table = $inspector->table($table_name);
+
+    return if ( !defined $table );
+
+    my $driver_name = $self->{dsn}->{driver};
+
+    if ( $driver_name eq 'mysql' ) {
+        my ($row) = $self->search_by_sql("SHOW CREATE TABLE $table_name");
+        return $row->{'Create Table'};
+    }
+    elsif ( $driver_name eq 'SQLite' ) {
+        return $table->{SQLITE_SQL};
+    }
+    elsif ( $driver_name eq 'Pg' ) {
+        die "not supported yet";
+    }
+    return;
+}
+
 
 1;
 __END__
@@ -45,6 +68,10 @@ Otogiri::Plugin::TableInfo is Otogiri plugin to fetch table information from dat
 =head2 my @table_names = $self->show_tables();
 
 returns table names in database.
+
+=head2 my $create_table_ddl = $self->desc($table_name);
+
+returns create table statement like MySQL's 'show create table'.
 
 =head1 LICENSE
 
