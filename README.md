@@ -20,6 +20,10 @@ Otogiri::Plugin::TableInfo is Otogiri plugin to fetch table information from dat
 
 returns table names in database.
 
+## my $create\_table\_ddl = $self->desc($table\_name);
+
+returns create table statement like MySQL's 'show create table'.
+
 # LICENSE
 
 Copyright (C) Takuya Tsuchida.
