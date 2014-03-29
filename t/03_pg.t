@@ -36,6 +36,7 @@ CREATE TABLE `member` (
 EOSQL
     $expected =~ s/\n$//; #trim last newline
     my $result = $db->desc('member');
+    #warn $result;
 
  TODO: {
         local $TODO = 'どんな感じに出せば良いかまだ分からん';

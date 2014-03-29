@@ -6,6 +6,7 @@ use warnings;
 use Otogiri;
 use Otogiri::Plugin;
 use DBIx::Inspector;
+use Otogiri::Plugin::TableInfo::Pg;
 
 our $VERSION = "0.01";
 
@@ -37,48 +38,13 @@ sub desc {
         return $table->{SQLITE_SQL};
     }
     elsif ( $driver_name eq 'Pg' ) {
-        my ($dsn, $user, $pass) = @{ $self->{connect_info} };
-        my ($scheme, $driver, $attr_string, $attr_hash, $driver_dsn) = DBI->parse_dsn($dsn);
-        my %attr = Otogiri::Plugin::TableInfo::_parse_driver_dsn($driver_dsn);
-        $attr{user}     = $user if ( !exists $attr{user} );
-        $attr{password} = $pass if ( !exists $attr{password} );
-        my $cmd = Otogiri::Plugin::TableInfo::_build_pg_dump_command($table_name, %attr);
-        my $result = `$cmd`;
-        return $result;
+        my $pg = Otogiri::Plugin::TableInfo::Pg->new($self);
+        return $pg->desc($table_name);
     }
     return;
 }
 
-sub _build_pg_dump_command {
-    my ($table_name, %args) = @_;
-    my $cmd = "pg_dump ";
-    $cmd .= "-d $args{dbname} " if ( exists $args{dbname} );
-    $cmd .= "-h $args{host} "   if ( exists $args{host} );
-    $cmd .= "-p $args{port} "   if ( exists $args{port} );
-    $cmd .= "-U $args{user} "   if ( exists $args{user} );
-    $cmd .= "-w --schema-only ";
-    $cmd .= "-t $table_name";
-    return $cmd;
-}
 
-sub _parse_driver_dsn {
-    my ($driver_dsn) = @_;
-
-    my @statements = split(qr/;/, $driver_dsn);
-    my %result = ();
-    for my $statement ( @statements ) {
-        my ($variable_name, $value) = map{ Otogiri::Plugin::TableInfo::_trim($_) } split(qr/=/, $statement);
-        $result{$variable_name} = $value;
-    }
-    return %result;
-}
-
-sub _trim {
-    my ($string) = @_;
-    $string =~ s/\A\s+//;
-    $string =~ s/\s+\z//;
-    return $string;
-}
 
 1;
 __END__
