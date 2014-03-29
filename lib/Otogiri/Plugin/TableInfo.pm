@@ -67,8 +67,8 @@ sub _parse_driver_dsn {
     my @statements = split(qr/;/, $driver_dsn);
     my %result = ();
     for my $statement ( @statements ) {
-        my ($lhs, $rhs) = map{ Otogiri::Plugin::TableInfo::_trim($_) } split(qr/=/, $statement);
-        $result{$lhs} = $rhs;
+        my ($variable_name, $value) = map{ Otogiri::Plugin::TableInfo::_trim($_) } split(qr/=/, $statement);
+        $result{$variable_name} = $value;
     }
     return %result;
 }
