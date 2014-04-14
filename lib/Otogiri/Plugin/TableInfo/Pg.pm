@@ -15,6 +15,37 @@ sub new {
 
 sub desc {
     my ($self, $table_name) = @_;
+    if ( !defined $self->{use_pg_dump} || $self->{use_pg_dump} ) { # default is using pg_dump
+        return $self->_desc_by_pg_dump($table_name);
+    }
+    return $self->_desc_by_inspector($table_name);
+}
+
+sub _desc_by_inspector {
+    my ($self, $table_name) = @_;
+    my $inspector = DBIx::Inspector->new(dbh => $self->dbh);
+    my $table = $inspector->table($table_name);
+
+    return if ( !defined $table );
+
+    my $result = "CREATE TABLE " . $table->name " (\n";
+    $result .= $self->_get_column_defs($table);
+    $result .= ")\n";
+    # TODO: index/fk
+    return $result;
+}
+
+sub _get_column_defs {
+    my ($self, $table) = @_;
+    my %pk = map { ( $_->name => $_ ) } $table->primary_key();
+    my $result = "";
+    for my $column ( $table->columns() ) {
+        $result .= "  " . $column->name . " " . $column->data_type . " ";
+    }
+}
+
+sub _desc_by_pg_dump {
+    my ($self, $table_name) = @_;
     my ($dsn, $user, $pass) = @{ $self->{table_info}->{connect_info} };
     my ($scheme, $driver, $attr_string, $attr_hash, $driver_dsn) = DBI->parse_dsn($dsn);
     my %attr = $self->_parse_driver_dsn($driver_dsn);
