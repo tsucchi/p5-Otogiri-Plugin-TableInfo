@@ -22,20 +22,7 @@ sub desc {
     $attr{password} = $pass if ( !exists $attr{password} );
     my $cmd = $self->_build_pg_dump_command($table_name, %attr);
     my $result = `$cmd`;
-    return $result;
-}
-
-
-sub _build_pg_dump_command {
-    my ($self, $table_name, %args) = @_;
-    my $cmd = "pg_dump ";
-    $cmd .= "-d $args{dbname} " if ( exists $args{dbname} );
-    $cmd .= "-h $args{host} "   if ( exists $args{host} );
-    $cmd .= "-p $args{port} "   if ( exists $args{port} );
-    $cmd .= "-U $args{user} "   if ( exists $args{user} );
-    $cmd .= "-w --schema-only ";
-    $cmd .= "-t $table_name";
-    return $cmd;
+    return $self->_trim_result($result);
 }
 
 sub _parse_driver_dsn {
@@ -48,6 +35,34 @@ sub _parse_driver_dsn {
         $result{$variable_name} = $value;
     }
     return %result;
+}
+
+sub _build_pg_dump_command {
+    my ($self, $table_name, %args) = @_;
+    my $cmd = "pg_dump ";
+    $cmd .= "-h $args{host} "   if ( exists $args{host} );
+    $cmd .= "-p $args{port} "   if ( exists $args{port} );
+    $cmd .= "-U $args{user} "   if ( exists $args{user} );
+    $cmd .= "-w --schema-only ";
+    $cmd .= "-t $table_name ";
+    $cmd .= "$args{dbname}";
+    return $cmd;
+}
+
+sub _trim_result {
+    my ($self, $input) = @_;
+    my @lines = split(qr/\n/, $input);
+    my $result = "";
+    for my $line ( @lines ) {
+        next if ( $line =~ qr/\A--/ );
+        next if ( $line =~ qr/\A\s*\z/ );
+        next if ( $line =~ qr/\ASET\s+/ );
+        next if ( $line =~ qr/\AREVOKE\s+/ );
+        next if ( $line =~ qr/\AGRANT\s+/ );
+        next if ( $line =~ qr/\AALTER TABLE\s+/ && $line =~ qr/\s+OWNER TO\s+/ );
+        $result .= "$line\n";
+    }
+    return $result;
 }
 
 sub _trim {
