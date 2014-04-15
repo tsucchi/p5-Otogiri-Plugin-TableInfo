@@ -3,6 +3,7 @@ use 5.008005;
 use strict;
 use warnings;
 use DBI;
+use DBIx::Inspector;
 
 sub new {
     my ($class, $table_info) = @_;
@@ -15,7 +16,7 @@ sub new {
 
 sub desc {
     my ($self, $table_name) = @_;
-    if ( !defined $self->{use_pg_dump} || $self->{use_pg_dump} ) { # default is using pg_dump
+    if ( !defined $self->{table_info}->{use_pg_dump} || $self->{table_info}->{use_pg_dump} ) { # default is using pg_dump
         return $self->_desc_by_pg_dump($table_name);
     }
     return $self->_desc_by_inspector($table_name);
@@ -23,25 +24,40 @@ sub desc {
 
 sub _desc_by_inspector {
     my ($self, $table_name) = @_;
-    my $inspector = DBIx::Inspector->new(dbh => $self->dbh);
+    my $inspector = DBIx::Inspector->new(dbh => $self->{table_info}->dbh);
     my $table = $inspector->table($table_name);
 
     return if ( !defined $table );
 
     my $result = "CREATE TABLE " . $table->name . " (\n";
     $result .= $self->_get_column_defs($table);
-    $result .= ")\n";
+    $result .= ");\n";
+    # TODO: sequence
+    $result .= $self->_get_pk_defs($table);
     # TODO: index/fk
     return $result;
 }
 
 sub _get_column_defs {
     my ($self, $table) = @_;
-    my %pk = map { ( $_->name => $_ ) } $table->primary_key();
     my $result = "";
     for my $column ( $table->columns() ) {
-        $result .= "  " . $column->name . " " . $column->data_type . " ";
+        $result .= "    " . $column->name . " " . $column->type_name;
+        $result .= " DEFAULT " . $column->column_def if ( defined $column->column_def );
+        $result .= " NOT NULL" if ( !$column->nullable );
+        $result .= ",\n";
     }
+    return $result;
+}
+
+sub _get_pk_defs {
+    my ($self, $table) = @_;
+    my $result = "";
+    for my $column ( $table->primary_key() ) {
+        $result .= "ALTER TABLE ONLY " . $table->name . "\n";
+        $result .= "    ADD CONSTRAINT " . $column->{PG_COLUMN} . " PRIMARY KEY (" . $column->name . ");\n";
+    }
+    return $result;
 }
 
 sub _desc_by_pg_dump {
