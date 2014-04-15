@@ -30,15 +30,15 @@ sub _desc_by_inspector {
     return if ( !defined $table );
 
     my $result = "CREATE TABLE " . $table->name . " (\n";
-    $result .= $self->_get_column_defs($table);
+    $result .= $self->_build_column_defs($table);
     $result .= ");\n";
     # TODO: sequence
-    $result .= $self->_get_pk_defs($table);
+    $result .= $self->_build_pk_defs($table);
     # TODO: index/fk
     return $result;
 }
 
-sub _get_column_defs {
+sub _build_column_defs {
     my ($self, $table) = @_;
     my $result = "";
     for my $column ( $table->columns() ) {
@@ -47,10 +47,11 @@ sub _get_column_defs {
         $result .= " NOT NULL" if ( !$column->nullable );
         $result .= ",\n";
     }
+    $result =~ s/,\n\z/\n/;
     return $result;
 }
 
-sub _get_pk_defs {
+sub _build_pk_defs {
     my ($self, $table) = @_;
     my $result = "";
     for my $column ( $table->primary_key() ) {
