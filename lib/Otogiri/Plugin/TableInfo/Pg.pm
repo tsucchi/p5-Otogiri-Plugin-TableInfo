@@ -28,7 +28,7 @@ sub _desc_by_inspector {
 
     return if ( !defined $table );
 
-    my $result = "CREATE TABLE " . $table->name " (\n";
+    my $result = "CREATE TABLE " . $table->name . " (\n";
     $result .= $self->_get_column_defs($table);
     $result .= ")\n";
     # TODO: index/fk
