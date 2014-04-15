@@ -32,7 +32,7 @@ sub _desc_by_inspector {
     my $result = "CREATE TABLE " . $table->name . " (\n";
     $result .= $self->_build_column_defs($table);
     $result .= ");\n";
-    # TODO: sequence
+    $result .= $self->_build_sequence_defs($table);
     $result .= $self->_build_pk_defs($table);
     # TODO: index/fk
     return $result;
@@ -43,12 +43,64 @@ sub _build_column_defs {
     my $result = "";
     for my $column ( $table->columns() ) {
         $result .= "    " . $column->name . " " . $column->type_name;
-        $result .= " DEFAULT " . $column->column_def if ( defined $column->column_def );
+        $result .= " DEFAULT " . $column->column_def if ( defined $column->column_def && !$self->_is_sequence_column($column) );
         $result .= " NOT NULL" if ( !$column->nullable );
         $result .= ",\n";
     }
     $result =~ s/,\n\z/\n/;
     return $result;
+}
+
+sub _build_sequence_defs {
+    my ($self, $table) = @_;
+    my $result = "";
+    my @sequence_columns = grep { $self->_is_sequence_column($_) } $table->columns();
+    for my $column ( @sequence_columns ) {
+        my $sequence_name = $self->_parse_sequence_name($column);
+        $result .= $self->_build_create_sequence_defs($sequence_name);
+        $result .= "ALTER SEQUENCE " . $sequence_name . " OWNED BY " . $table->name . "." . $column->name . ";\n";
+        $result .= "ALTER TABLE ONLY " . $table->name . " ALTER COLUMN " . $column->name . " SET DEFAULT " . $column->column_def . ";\n";
+    }
+    return $result;
+}
+
+sub _parse_sequence_name {
+    my ($self, $column) = @_;
+    if ( $column->column_def =~ qr/^nextval\('([^']+)'::regclass\)/ ) {
+        return $1;
+    }
+    return;
+}
+
+sub _build_create_sequence_defs {
+    my ($self, $sequence_name) = @_;
+    my ($row) = $self->{table_info}->select($sequence_name);
+    my $result = "CREATE SEQUENCE $sequence_name\n";
+    $result .= "    START WITH " . $row->{start_value} . "\n";
+    $result .= "    INCREMENT BY " . $row->{increment_by} . "\n";
+    if ( $row->{min_value} eq '1' ) {
+        $result .= "    NO MINVALUE\n";
+    }
+    else {
+        $result .= "    MINVALUE " . $row->{min_value} . "\n";
+    }
+
+    if ( $row->{max_value} eq '9223372036854775807' ) { # TODO: support for various integer(not only 64bit)
+        $result .= "    NO MAXVALUE\n";
+    }
+    else {
+        $result .= "    MAXVALUE " . $row->{max_value} . "\n";
+    }
+
+    $result .= "    CACHE " . $row->{cache_value} . ";\n";
+    return $result;
+}
+
+sub _is_sequence_column {
+    my ($self, $column) = @_;
+    my $default_value = $column->column_def;
+    return if ( !defined $default_value );
+    return $default_value =~ qr/^nextval\(/;
 }
 
 sub _build_pk_defs {
