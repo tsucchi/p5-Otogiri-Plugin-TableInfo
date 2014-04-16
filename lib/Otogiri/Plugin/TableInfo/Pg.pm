@@ -87,7 +87,7 @@ sub _build_create_sequence_defs {
         $result .= "    MINVALUE " . $row->{min_value} . "\n";
     }
 
-    if ( $row->{max_value} eq '9223372036854775807' ) { # TODO: support for various integer(not only 64bit)
+    if ( $row->{max_value} eq '9223372036854775807' ) {
         $result .= "    NO MAXVALUE\n";
     }
     else {
