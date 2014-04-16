@@ -34,6 +34,7 @@ sub _desc_by_inspector {
     $result .= ");\n";
     $result .= $self->_build_sequence_defs($table);
     $result .= $self->_build_pk_defs($table);
+    $result .= $self->_build_fk_defs($table);
     # TODO: index/fk
     return $result;
 }
@@ -109,6 +110,20 @@ sub _build_pk_defs {
     for my $column ( $table->primary_key() ) {
         $result .= "ALTER TABLE ONLY " . $table->name . "\n";
         $result .= "    ADD CONSTRAINT " . $column->{PG_COLUMN} . " PRIMARY KEY (" . $column->name . ");\n";
+    }
+    return $result;
+}
+
+sub _build_fk_defs {
+    my ($self, $table) = @_;
+    my $result = '';
+    for my $fk_info ( $table->fk_foreign_keys() ) {
+        $result .= "ALTER TABLE ONLY " . $table->name . "\n";
+        $result .= "    ADD CONSTRAINT " . $fk_info->fk_name . " FOREIGN KEY (" . $fk_info->fkcolumn_name . ")";
+        $result .= " REFERENCES " . $fk_info->pktable_name . "(" . $fk_info->pkcolumn_name . ")";
+        $result .= " ON UPDATE CASCADE"; #TODO: support UPDATE_RULE
+        $result .= " ON DELETE CASCADE"; #TODO: support DELETE_RULE
+        $result .= ";\n";
     }
     return $result;
 }
