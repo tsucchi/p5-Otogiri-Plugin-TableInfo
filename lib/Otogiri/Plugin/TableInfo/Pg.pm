@@ -35,7 +35,7 @@ sub _desc_by_inspector {
     $result .= $self->_build_sequence_defs($table);
     $result .= $self->_build_pk_defs($table);
     $result .= $self->_build_fk_defs($table);
-    # TODO: index/fk
+    # TODO: index
     return $result;
 }
 
@@ -117,12 +117,21 @@ sub _build_pk_defs {
 sub _build_fk_defs {
     my ($self, $table) = @_;
     my $result = '';
+    # UPDATE_RULE and DELETE_RULE are described in http://search.cpan.org/dist/DBI/DBI.pm#foreign_key_info
+    my %rule = (
+        0 => 'CASCADE',
+        1 => 'RESTRICT',
+        2 => 'SET NULL',
+        #3 => 'NO ACTION', # If NO ACTION, ON UPDATE/DELETE statament is not exist.
+        4 => 'SET DEFAULT',
+    );
+
     for my $fk_info ( $table->fk_foreign_keys() ) {
         $result .= "ALTER TABLE ONLY " . $table->name . "\n";
         $result .= "    ADD CONSTRAINT " . $fk_info->fk_name . " FOREIGN KEY (" . $fk_info->fkcolumn_name . ")";
         $result .= " REFERENCES " . $fk_info->pktable_name . "(" . $fk_info->pkcolumn_name . ")";
-        $result .= " ON UPDATE CASCADE"; #TODO: support UPDATE_RULE
-        $result .= " ON DELETE CASCADE"; #TODO: support DELETE_RULE
+        $result .= " ON UPDATE " . $rule{$fk_info->{UPDATE_RULE}} if ( exists $rule{$fk_info->{UPDATE_RULE}} );
+        $result .= " ON DELETE " . $rule{$fk_info->{DELETE_RULE}} if ( exists $rule{$fk_info->{DELETE_RULE}} );
         $result .= ";\n";
     }
     return $result;
