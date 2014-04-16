@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use DBI;
 use DBIx::Inspector;
+use List::MoreUtils qw(any);
 
 sub new {
     my ($class, $table_info) = @_;
@@ -34,8 +35,8 @@ sub _desc_by_inspector {
     $result .= ");\n";
     $result .= $self->_build_sequence_defs($table);
     $result .= $self->_build_pk_defs($table);
+    $result .= $self->_build_index_defs($table);
     $result .= $self->_build_fk_defs($table);
-    # TODO: index
     return $result;
 }
 
@@ -112,6 +113,22 @@ sub _build_pk_defs {
         $result .= "    ADD CONSTRAINT " . $column->{PG_COLUMN} . " PRIMARY KEY (" . $column->name . ");\n";
     }
     return $result;
+}
+
+sub _build_index_defs {
+    my ($self, $table) = @_;
+    my @rows = sort { $a->{indexname} cmp $b->{indexname} } $self->{table_info}->select('pg_indexes', { tablename => $table->name });
+    my $result = '';
+    for my $row ( @rows ) {
+        next if ( $self->_is_pk($table, $row->{indexname}) );
+        $result .= $row->{indexdef} . "\n";
+    }
+    return $result;
+}
+
+sub _is_pk {
+    my ($self, $table, $column_name) = @_;
+    return any { $_->name eq $column_name } $table->primary_key();
 }
 
 sub _build_fk_defs {
