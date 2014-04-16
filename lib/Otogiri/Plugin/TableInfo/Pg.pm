@@ -121,14 +121,14 @@ sub _build_index_defs {
     my $result = '';
     for my $row ( @rows ) {
         next if ( $self->_is_pk($table, $row->{indexname}) );
-        $result .= $row->{indexdef} . "\n";
+        $result .= $row->{indexdef} . ";\n";
     }
     return $result;
 }
 
 sub _is_pk {
     my ($self, $table, $column_name) = @_;
-    return any { $_->name eq $column_name } $table->primary_key();
+    return any { $_->{PK_NAME} eq $column_name } $table->primary_key();
 }
 
 sub _build_fk_defs {
