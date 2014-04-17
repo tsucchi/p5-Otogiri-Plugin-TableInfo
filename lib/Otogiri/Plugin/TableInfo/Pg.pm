@@ -33,13 +33,14 @@ sub _desc_by_inspector {
 
     return if ( !defined $table );
 
+    my @indexes = $self->{table_info}->select('pg_indexes', { tablename => $table->name }, { order_by => 'indexname' });
     my $result = "CREATE TABLE " . $table->name . " (\n";
     $result .= $self->_build_column_defs($table);
     $result .= ");\n";
     $result .= $self->_build_sequence_defs($table);
     $result .= $self->_build_pk_defs($table);
-    $result .= $self->_build_uk_defs($table);
-    $result .= $self->_build_index_defs($table);
+    $result .= $self->_build_uk_defs($table, @indexes);
+    $result .= $self->_build_index_defs($table, @indexes);
     $result .= $self->_build_fk_defs($table);
     return $result;
 }
@@ -121,13 +122,9 @@ sub _build_pk_defs {
 }
 
 sub _build_index_defs {
-    my ($self, $table) = @_;
-    # TODO: 2回selectしてて効率悪いので引数にする
-    my @rows = sort {
-        $a->{indexname} cmp $b->{indexname}
-    } grep {
-        $_->{indexdef} !~ qr/\ACREATE UNIQUE INDEX/
-    } $self->{table_info}->select('pg_indexes', { tablename => $table->name });
+    my ($self, $table, @indexes) = @_;
+
+    my @rows = grep { $_->{indexdef} !~ qr/\ACREATE UNIQUE INDEX/ } @indexes;
 
     my $result = '';
     for my $row ( @rows ) {
@@ -143,18 +140,16 @@ sub _is_pk {
 }
 
 sub _build_uk_defs {
-    my ($self, $table) = @_;
+    my ($self, $table, @indexes) = @_;
     # TODO: 2回selectしてて効率悪いので引数にする
-    my @indexes = sort {
-        $a->{indexname} cmp $b->{indexname}
-    } grep {
+    my @unique_indexes = grep {
         $_->{indexdef} =~ qr/\ACREATE UNIQUE INDEX/ && !$self->_is_pk($table, $_->{indexname})
-    } $self->{table_info}->select('pg_indexes', { tablename => $table->name });
+    } @indexes;
 
     my $result = '';
     # TODO: これは異常なので、pg_dump 側を変換して素のindexdef を使うようにするべき
     # return join(";\n", map{ $_->{indexdef} } @indexes);
-    for my $unique_index ( @indexes ) {
+    for my $unique_index ( @unique_indexes ) {
         my $columns = undef;
         if ( $unique_index->{indexdef} =~ qr/\(([^(]+)\)\z/ ) {
             $columns = $1;
