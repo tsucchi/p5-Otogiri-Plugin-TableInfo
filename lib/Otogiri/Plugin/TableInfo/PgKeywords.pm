@@ -5,6 +5,7 @@ use warnings;
 
 # keywords are picked from postgresql-9.3.4/src/include/parser/kwlist.h
 
+# COL_NAME_KEYWORD
 my @col_name_keywords = (
     'between',
     'bigint',
