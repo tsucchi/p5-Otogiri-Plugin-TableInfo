@@ -154,8 +154,14 @@ sub _build_uk_defs {
             $columns = $1;
         }
         next if ( !defined $columns );
-        $result .= "ALTER TABLE ONLY " . $table->name . "\n";
-        $result .= "    ADD CONSTRAINT " . $unique_index->{indexname} . " UNIQUE (" . $columns . ");\n";
+
+        if ( $unique_index->{indexname} =~ qr/index\z/ ) {
+            $result .= $unique_index->{indexdef} . ";\n";
+        }
+        else {
+            $result .= "ALTER TABLE ONLY " . $table->name . "\n";
+            $result .= "    ADD CONSTRAINT " . $unique_index->{indexname} . " UNIQUE (" . $columns . ");\n";
+        }
     }
     return $result;
 }
