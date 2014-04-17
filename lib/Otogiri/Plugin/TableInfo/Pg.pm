@@ -38,6 +38,7 @@ sub _desc_by_inspector {
     $result .= ");\n";
     $result .= $self->_build_sequence_defs($table);
     $result .= $self->_build_pk_defs($table);
+    $result .= $self->_build_uk_defs($table);
     $result .= $self->_build_index_defs($table);
     $result .= $self->_build_fk_defs($table);
     return $result;
@@ -121,7 +122,13 @@ sub _build_pk_defs {
 
 sub _build_index_defs {
     my ($self, $table) = @_;
-    my @rows = sort { $a->{indexname} cmp $b->{indexname} } $self->{table_info}->select('pg_indexes', { tablename => $table->name });
+    # TODO: 2回selectしてて効率悪いので引数にする
+    my @rows = sort {
+        $a->{indexname} cmp $b->{indexname}
+    } grep {
+        $_->{indexdef} !~ qr/\ACREATE UNIQUE INDEX/
+    } $self->{table_info}->select('pg_indexes', { tablename => $table->name });
+
     my $result = '';
     for my $row ( @rows ) {
         next if ( $self->_is_pk($table, $row->{indexname}) );
@@ -133,6 +140,30 @@ sub _build_index_defs {
 sub _is_pk {
     my ($self, $table, $column_name) = @_;
     return any { $_->{PK_NAME} eq $column_name } $table->primary_key();
+}
+
+sub _build_uk_defs {
+    my ($self, $table) = @_;
+    # TODO: 2回selectしてて効率悪いので引数にする
+    my @indexes = sort {
+        $a->{indexname} cmp $b->{indexname}
+    } grep {
+        $_->{indexdef} =~ qr/\ACREATE UNIQUE INDEX/ && !$self->_is_pk($table, $_->{indexname})
+    } $self->{table_info}->select('pg_indexes', { tablename => $table->name });
+
+    my $result = '';
+    # TODO: これは異常なので、pg_dump 側を変換して素のindexdef を使うようにするべき
+    # return join(";\n", map{ $_->{indexdef} } @indexes);
+    for my $unique_index ( @indexes ) {
+        my $columns = undef;
+        if ( $unique_index->{indexdef} =~ qr/\(([^(]+)\)\z/ ) {
+            $columns = $1;
+        }
+        next if ( !defined $columns );
+        $result .= "ALTER TABLE ONLY " . $table->name . "\n";
+        $result .= "    ADD CONSTRAINT " . $unique_index->{indexname} . " UNIQUE (" . $columns . ");\n";
+    }
+    return $result;
 }
 
 sub _build_fk_defs {
@@ -153,6 +184,7 @@ sub _build_fk_defs {
         $result .= " REFERENCES " . $fk_info->pktable_name . "(" . $fk_info->pkcolumn_name . ")";
         $result .= " ON UPDATE " . $rule{$fk_info->{UPDATE_RULE}} if ( exists $rule{$fk_info->{UPDATE_RULE}} );
         $result .= " ON DELETE " . $rule{$fk_info->{DELETE_RULE}} if ( exists $rule{$fk_info->{DELETE_RULE}} );
+        $result .= " DEFERRABLE" if ( $fk_info->deferability ne '7' );
         $result .= ";\n";
     }
     return $result;
