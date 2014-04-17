@@ -141,7 +141,6 @@ sub _is_pk {
 
 sub _build_uk_defs {
     my ($self, $table, @indexes) = @_;
-    # TODO: 2回selectしてて効率悪いので引数にする
     my @unique_indexes = grep {
         $_->{indexdef} =~ qr/\ACREATE UNIQUE INDEX/ && !$self->_is_pk($table, $_->{indexname})
     } @indexes;
