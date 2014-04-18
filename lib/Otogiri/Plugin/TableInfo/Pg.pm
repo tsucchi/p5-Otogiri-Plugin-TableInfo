@@ -50,7 +50,7 @@ sub _build_column_defs {
     my $result = "";
     for my $column ( $table->columns() ) {
         my $column_name = $self->{keywords}->quote($column->name); #quote column name if it is need.
-        $result .= "    " . $column_name . " " . $column->type_name;
+        $result .= "    " . $column_name . " " . $column->{PG_TYPE};
         $result .= " DEFAULT " . $column->column_def if ( defined $column->column_def && !$self->_is_sequence_column($column) );
         $result .= " NOT NULL" if ( !$column->nullable );
         $result .= ",\n";
