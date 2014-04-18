@@ -25,3 +25,4 @@ cover_db/
 MYMETA.*
 
 /Otogiri-Plugin-TableInfo-*
+eg/config.pl
