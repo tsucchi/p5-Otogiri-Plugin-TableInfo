@@ -141,24 +141,9 @@ sub _build_uk_defs {
     my @unique_indexes = grep {
         $_->{indexdef} =~ qr/\ACREATE UNIQUE INDEX/ && !$self->_is_pk($table, $_->{indexname})
     } @indexes;
-
     my $result = '';
-    # TODO: これは異常なので、pg_dump 側を変換して素のindexdef を使うようにするべき
-    # return join(";\n", map{ $_->{indexdef} } @indexes);
-    for my $unique_index ( @unique_indexes ) {
-        my $columns = undef;
-        if ( $unique_index->{indexdef} =~ qr/\(([^(]+)\)\z/ ) {
-            $columns = $1;
-        }
-        next if ( !defined $columns );
-
-        if ( $unique_index->{indexname} =~ qr/index\z/ || $unique_index->{indexdef}=~ qr/\sWHERE\s/ ) {
-            $result .= $unique_index->{indexdef} . ";\n";
-        }
-        else {
-            $result .= "ALTER TABLE ONLY " . $table->name . "\n";
-            $result .= "    ADD CONSTRAINT " . $unique_index->{indexname} . " UNIQUE (" . $columns . ");\n";
-        }
+    for my $indexdef ( map{ $_->{indexdef} } @unique_indexes ) {
+        $result .= $indexdef . ";\n";
     }
     return $result;
 }

@@ -44,8 +44,10 @@ sub desc_by_pg_dump {
     $attr{user}     = $user if ( !exists $attr{user} );
     $attr{password} = $pass if ( !exists $attr{password} );
     my $cmd = _build_pg_dump_command($table_name, %attr);
-    my $result = `$cmd`;
-    return _trim_result($result);
+    my $cmd_result = `$cmd`;
+    my $result = _trim_result($cmd_result);
+    _fix_unique_index_ddl(\$result, $table_name);
+    return $result;
 }
 
 sub _parse_driver_dsn {
@@ -93,4 +95,12 @@ sub _trim {
     $string =~ s/\A\s+//;
     $string =~ s/\s+\z//;
     return $string;
+}
+
+sub _fix_unique_index_ddl {
+    my ($input_sref, $table_name) = @_;
+
+    while ( $$input_sref =~ /ALTER TABLE ONLY $table_name\n    ADD CONSTRAINT (.+?) UNIQUE \(([^)]+)\);\n/mg ) {
+        $$input_sref =~ s/ALTER TABLE ONLY $table_name\n    ADD CONSTRAINT (.+?) UNIQUE \(([^)]+)\);\n/CREATE UNIQUE INDEX $1 ON $table_name USING btree ($2);\n/m;
+    }
 }
