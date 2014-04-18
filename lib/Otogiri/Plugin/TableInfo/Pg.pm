@@ -155,7 +155,7 @@ sub _build_uk_defs {
         }
         next if ( !defined $columns );
 
-        if ( $unique_index->{indexname} =~ qr/index\z/ ) {
+        if ( $unique_index->{indexname} =~ qr/index\z/ || $unique_index->{indexdef}=~ qr/\sWHERE\s/ ) {
             $result .= $unique_index->{indexdef} . ";\n";
         }
         else {
