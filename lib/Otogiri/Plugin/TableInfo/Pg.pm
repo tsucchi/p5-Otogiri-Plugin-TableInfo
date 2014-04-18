@@ -20,11 +20,6 @@ sub new {
 
 sub desc {
     my ($self, $table_name) = @_;
-    return $self->_desc_by_inspector($table_name);
-}
-
-sub _desc_by_inspector {
-    my ($self, $table_name) = @_;
     my $inspector = DBIx::Inspector->new(dbh => $self->{table_info}->dbh);
     my $table = $inspector->table($table_name);
 
@@ -194,5 +189,5 @@ Otogiri::Plugin::TableInfo::Pg - build CREATE TABLE statement for PostgreSQL
 =head1 DESCRIPTION
 
 Otogiri::Plugin::TableInfo is Otogiri plugin to fetch table information from database.
-
 =cut
+
