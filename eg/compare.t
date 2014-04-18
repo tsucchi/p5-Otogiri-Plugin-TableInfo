@@ -29,7 +29,6 @@ for my $table_name ( $db->show_tables() ) {
     next if ( any{ $table_name eq $_ } @{ $config->{exclude_tables} || [] } );
 
     my $pg_dump = desc_by_pg_dump($db, $table_name);
-    $db->use_pg_dump(0);
     my $inspector = $db->desc($table_name);
     eq_or_diff($pg_dump, $inspector) or fail "error in $table_name";
 }

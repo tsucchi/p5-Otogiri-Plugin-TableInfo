@@ -20,9 +20,6 @@ sub new {
 
 sub desc {
     my ($self, $table_name) = @_;
-    if ( !defined $self->{table_info}->{use_pg_dump} || $self->{table_info}->{use_pg_dump} ) { # default is using pg_dump
-        return $self->_desc_by_pg_dump($table_name);
-    }
     return $self->_desc_by_inspector($table_name);
 }
 
