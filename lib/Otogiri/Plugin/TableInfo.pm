@@ -73,17 +73,15 @@ Otogiri::Plugin::TableInfo is Otogiri plugin to fetch table information from dat
 
 returns table names in database.
 
-
-=head2 my $create_table_ddl = $self->desc($table_name);
-
-returns create table statement like MySQL's 'show create table'.
-
 parameter C<$like_regex> is optional. If it is passed, table name is filtered by regex like MySQL's C<SHOW TABLES LIKE ...> statement.
 
     my @table_names = $db->show_tables(qr/^user_/); # return table names that starts with 'user_'
 
 If C<$like_regex> is not passed, all table_names in current database are returned.
 
+=head2 my $create_table_ddl = $self->desc($table_name);
+
+returns create table statement like MySQL's 'show create table'.
 
 =head1 LICENSE
 
