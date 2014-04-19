@@ -4,7 +4,8 @@ use Test::More;
 use DBI;
 use Otogiri;
 use Otogiri::Plugin;
-use Test::mysqld;
+
+use Test::Requires 'Test::mysqld';
 
 my $mysqld = Test::mysqld->new(
     my_cnf => {
