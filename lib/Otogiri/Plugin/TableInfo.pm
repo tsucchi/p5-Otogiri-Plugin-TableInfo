@@ -51,6 +51,8 @@ __END__
 
 =encoding utf-8
 
+=for stopwords desc
+
 =head1 NAME
 
 Otogiri::Plugin::TableInfo - retrieve table information from database

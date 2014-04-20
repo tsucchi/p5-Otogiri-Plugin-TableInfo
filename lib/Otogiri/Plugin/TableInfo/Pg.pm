@@ -174,6 +174,8 @@ __END__
 
 =encoding utf-8
 
+=for stopwords PostgreSQL
+
 =head1 NAME
 
 Otogiri::Plugin::TableInfo::Pg - build CREATE TABLE statement for PostgreSQL
