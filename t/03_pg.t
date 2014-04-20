@@ -70,7 +70,8 @@ subtest 'desc person - basic syntax, null/notnull, serial', sub {
     my $expected = desc_by_pg_dump($db, 'person');
     note $expected;
     my $result = $db->desc('person');
-    eq_or_diff( $result, $expected );
+    use Data::Dumper;
+    eq_or_diff( $result, $expected ) or diag Dumper( $expected );
 };
 
 subtest 'desc detective - foreign key(SET NULL, RESTRICT), index', sub {
