@@ -6,7 +6,6 @@ perl:
   - 5.18
 before_install:
   - cpanm --force Test::mysqld Test::PostgreSQL
-  - cpanm --force --uninstall Test::PostgreSQL
   - cpanm -n Devel::Cover::Report::Coveralls
   - cover -delete 
 script:

@@ -55,6 +55,10 @@ EOF
 $db->dbh->do($sql_baseball_player);
 $db->dbh->do('CREATE INDEX ON baseball_player (position)');
 
+my $pg_dump_result = desc_by_pg_dump($db, 'person');
+if ( !defined $pg_dump_result ) {
+    plan skip_all => "pg_dump can't run correctly";
+}
 
 subtest 'desc - table does not exist', sub {
     my $result = $db->desc('hoge');
