@@ -6,10 +6,11 @@ use warnings;
 use Otogiri;
 use Otogiri::Plugin;
 use DBIx::Inspector;
+use Otogiri::Plugin::TableInfo::Pg;
 
 our $VERSION = "0.01";
 
-our @EXPORT = qw(show_tables);
+our @EXPORT = qw(show_tables desc);
 
 sub show_tables {
     my ($self, $like_regex) = @_;
@@ -20,10 +21,37 @@ sub show_tables {
     return @result;
 }
 
+sub desc {
+    my ($self, $table_name) = @_;
+    my $inspector = DBIx::Inspector->new(dbh => $self->dbh);
+    my $table = $inspector->table($table_name);
+
+    return if ( !defined $table );
+
+    my $driver_name = $self->{dsn}->{driver};
+
+    if ( $driver_name eq 'mysql' ) {
+        my ($row) = $self->search_by_sql("SHOW CREATE TABLE $table_name");
+        return $row->{'Create Table'};
+    }
+    elsif ( $driver_name eq 'SQLite' ) {
+        return $table->{SQLITE_SQL};
+    }
+    elsif ( $driver_name eq 'Pg' ) {
+        my $pg = Otogiri::Plugin::TableInfo::Pg->new($self);
+        return $pg->desc($table_name);
+    }
+    return;
+}
+
+
+
 1;
 __END__
 
 =encoding utf-8
+
+=for stopwords desc
 
 =head1 NAME
 
@@ -52,6 +80,10 @@ parameter C<$like_regex> is optional. If it is passed, table name is filtered by
     my @table_names = $db->show_tables(qr/^user_/); # return table names that starts with 'user_'
 
 If C<$like_regex> is not passed, all table_names in current database are returned.
+
+=head2 my $create_table_ddl = $self->desc($table_name);
+
+returns create table statement like MySQL's 'show create table'.
 
 =head1 LICENSE
 
