@@ -20,7 +20,7 @@ my $sql = <<'EOF';
 CREATE TABLE member (
     id   INTEGER PRIMARY KEY AUTO_INCREMENT,
     name TEXT    NOT NULL
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 EOF
 
 $db->dbh->do($sql);
