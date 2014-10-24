@@ -10,7 +10,7 @@ use Otogiri::Plugin::TableInfo::Pg;
 
 our $VERSION = "0.01";
 
-our @EXPORT = qw(show_tables desc);
+our @EXPORT = qw(show_tables show_create_table desc);
 
 sub show_tables {
     my ($self, $like_regex) = @_;
@@ -19,6 +19,11 @@ sub show_tables {
     my @result = map { $_->name } $inspector->tables;
     @result = grep { $_ =~ /$like_regex/ } @result if ( defined $like_regex );
     return @result;
+}
+
+sub show_create_table {
+    my ($self, $table_name) = @_;
+    return $self->desc($table_name);
 }
 
 sub desc {

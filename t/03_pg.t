@@ -67,25 +67,38 @@ subtest 'desc - table does not exist', sub {
 
 subtest 'desc person - basic syntax, null/notnull, serial', sub {
     my $expected = desc_by_pg_dump($db, 'person');
+
     note $expected;
-    my $result = $db->desc('person');
-    eq_or_diff( $result, $expected );
+
+    my $result_desc = $db->desc('person');
+    my $result_show_create_table = $db->show_create_table('person');
+
+    eq_or_diff( $result_desc,              $expected );
+    eq_or_diff( $result_show_create_table, $expected );
 };
 
 subtest 'desc detective - foreign key(SET NULL, RESTRICT), index', sub {
     my $expected = desc_by_pg_dump($db, 'detective');
-    note $expected;
-    my $result = $db->desc('detective');
-    eq_or_diff( $result, $expected );
 
+    note $expected;
+
+    my $result_desc = $db->desc('detective');
+    my $result_show_create_table = $db->show_create_table('detective');
+
+    eq_or_diff( $result_desc,              $expected );
+    eq_or_diff( $result_show_create_table, $expected );
 };
 
 subtest 'desc baseball_player - foreign key(SET DEFAULT, CASCADE), reserved word, index', sub {
     my $expected = desc_by_pg_dump($db, 'baseball_player');
-    note $expected;
-    my $result = $db->desc('baseball_player');
-    eq_or_diff( $result, $expected );
 
+    note $expected;
+
+    my $result_desc = $db->desc('baseball_player');
+    my $result_show_create_table = $db->show_create_table('baseball_player');
+
+    eq_or_diff( $result_desc,              $expected );
+    eq_or_diff( $result_show_create_table, $expected );
 };
 
 

@@ -46,8 +46,11 @@ subtest 'show_tables(with regex)', sub {
     ok( any { $_ eq 'person' }    @result );
 };
 
-subtest 'desc', sub {
-    my $result = $db->desc('detective');
+subtest 'desc and show_create_table', sub {
+
+    my $result_desc = $db->desc('detective');
+    my $result_show_create_table = $db->show_create_table('detective');
+
     my $expected = <<EOSQL;
 CREATE TABLE detective (
   id        INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -57,7 +60,9 @@ CREATE TABLE detective (
 )
 EOSQL
     $expected =~ s/\n$//; # trim last newline
-    is( $result, $expected );
+
+    is( $result_desc,              $expected );
+    is( $result_show_create_table, $expected );
 };
 
 subtest 'desc(table does not exist)', sub {

@@ -26,7 +26,7 @@ EOF
 $db->dbh->do($sql);
 
 
-subtest 'desc', sub {
+subtest 'desc and show_create_table', sub {
     my $expected = <<EOSQL;
 CREATE TABLE `member` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -35,8 +35,12 @@ CREATE TABLE `member` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
 EOSQL
     $expected =~ s/\n$//; #trim last newline
-    my $result = $db->desc('member');
-    is( $result, $expected );
+
+    my $result_desc = $db->desc('member');
+    my $result_show_create_table = $db->show_create_table('member');
+
+    is( $result_desc,              $expected );
+    is( $result_show_create_table, $expected );
 };
 
 subtest 'desc(table does not exist)', sub {
