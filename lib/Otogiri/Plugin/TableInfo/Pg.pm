@@ -18,7 +18,13 @@ sub new {
 }
 
 
-sub desc {
+sub show_create_view {
+    my ($self, $view_name) = @_;
+    my ($row) = $self->{table_info}->search_by_sql('SELECT definition FROM pg_views WHERE viewname = ?', [$view_name]);
+    return $row->{definition};
+}
+
+sub show_create_table {
     my ($self, $table_name) = @_;
     my $inspector = DBIx::Inspector->new(dbh => $self->{table_info}->dbh);
     my $table = $inspector->table($table_name);

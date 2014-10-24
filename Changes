@@ -2,7 +2,8 @@ Revision history for Perl extension Otogiri-Plugin-TableInfo
 
 {{$NEXT}}
 
-    - new feature show_creaate_table() (alias to desc)
+    - new feature show_create_table() (alias to desc)
+    - new feature show_create_view()
     - add missing dependency(DBD::SQLite)
 
 0.01 2014-05-11T03:30:54Z

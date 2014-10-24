@@ -101,5 +101,20 @@ subtest 'desc baseball_player - foreign key(SET DEFAULT, CASCADE), reserved word
     eq_or_diff( $result_show_create_table, $expected );
 };
 
+subtest 'show_create_view', sub {
+
+    $db->do('CREATE VIEW detective_view AS SELECT person_id, toys FROM detective');
+
+    my $result = $db->show_create_view('detective_view');
+    my $expected = <<EOSQL;
+ SELECT detective.person_id,
+    detective.toys
+   FROM detective;
+EOSQL
+    $expected =~ s/\n$//; # trim last newline
+
+    is( $result, $expected );
+};
+
 
 done_testing;

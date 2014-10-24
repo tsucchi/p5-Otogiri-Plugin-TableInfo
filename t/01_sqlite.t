@@ -65,6 +65,19 @@ EOSQL
     is( $result_show_create_table, $expected );
 };
 
+subtest 'show_create_view', sub {
+
+    $db->do('CREATE VIEW detective_view AS SELECT id, toys FROM detective');
+
+    my $result = $db->show_create_view('detective_view');
+    my $expected = <<EOSQL;
+CREATE VIEW detective_view AS SELECT id, toys FROM detective
+EOSQL
+    $expected =~ s/\n$//; # trim last newline
+
+    is( $result, $expected );
+};
+
 subtest 'desc(table does not exist)', sub {
     my $result = $db->desc('hoge');
     is( $result, undef );

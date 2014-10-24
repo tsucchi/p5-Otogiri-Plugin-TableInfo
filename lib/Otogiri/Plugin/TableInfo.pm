@@ -10,7 +10,7 @@ use Otogiri::Plugin::TableInfo::Pg;
 
 our $VERSION = "0.01";
 
-our @EXPORT = qw(show_tables show_create_table desc);
+our @EXPORT = qw(show_tables show_create_table show_create_view desc);
 
 sub show_tables {
     my ($self, $like_regex) = @_;
@@ -22,11 +22,6 @@ sub show_tables {
 }
 
 sub show_create_table {
-    my ($self, $table_name) = @_;
-    return $self->desc($table_name);
-}
-
-sub desc {
     my ($self, $table_name) = @_;
     my $inspector = DBIx::Inspector->new(dbh => $self->dbh);
     my $table = $inspector->table($table_name);
@@ -44,9 +39,37 @@ sub desc {
     }
     elsif ( $driver_name eq 'Pg' ) {
         my $pg = Otogiri::Plugin::TableInfo::Pg->new($self);
-        return $pg->desc($table_name);
+        return $pg->show_create_table($table_name);
     }
     return;
+}
+
+sub show_create_view {
+    my ($self, $view_name) = @_;
+    my $inspector = DBIx::Inspector->new(dbh => $self->dbh);
+    my $view = $inspector->view($view_name);
+
+    return if ( !defined $view );
+
+    my $driver_name = $self->{dsn}->{driver};
+
+    if ( $driver_name eq 'mysql' ) {
+        my ($row) = $self->search_by_sql("SHOW CREATE VIEW $view_name");
+        return $row->{'Create View'};
+    }
+    elsif ( $driver_name eq 'SQLite' ) {
+        return $view->{SQLITE_SQL};
+    }
+    elsif ( $driver_name eq 'Pg' ) {
+        my $pg = Otogiri::Plugin::TableInfo::Pg->new($self);
+        return $pg->show_create_view($view_name);
+    }
+    return;
+}
+
+sub desc {
+    my ($self, $table_name) = @_;
+    $self->show_create_table($table_name);
 }
 
 
@@ -91,6 +114,11 @@ If C<$like_regex> is not passed, all table_names in current database are returne
 =head2 my $create_table_ddl = $self->show_create_table($table_name);
 
 returns create table statement like MySQL's 'show create table'.
+
+
+=head2 my $create_view_sql = $self->show_create_view($view_name);
+
+returns create view SQLt like MySQL's 'show create view'.
 
 =head1 LICENSE
 
