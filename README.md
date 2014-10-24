@@ -28,6 +28,8 @@ If `$like_regex` is not passed, all table\_names in current database are returne
 
 ## my $create\_table\_ddl = $self->desc($table\_name);
 
+## my $create\_table\_ddl = $self->show\_create\_table($table\_name);
+
 returns create table statement like MySQL's 'show create table'.
 
 # LICENSE

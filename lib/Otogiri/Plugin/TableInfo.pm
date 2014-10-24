@@ -88,6 +88,8 @@ If C<$like_regex> is not passed, all table_names in current database are returne
 
 =head2 my $create_table_ddl = $self->desc($table_name);
 
+=head2 my $create_table_ddl = $self->show_create_table($table_name);
+
 returns create table statement like MySQL's 'show create table'.
 
 =head1 LICENSE
