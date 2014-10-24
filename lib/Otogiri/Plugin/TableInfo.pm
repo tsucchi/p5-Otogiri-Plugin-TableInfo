@@ -8,7 +8,7 @@ use Otogiri::Plugin;
 use DBIx::Inspector;
 use Otogiri::Plugin::TableInfo::Pg;
 
-our $VERSION = "0.01";
+our $VERSION = "0.02";
 
 our @EXPORT = qw(show_tables show_create_table show_create_view desc);
 
@@ -118,7 +118,7 @@ returns create table statement like MySQL's 'show create table'.
 
 =head2 my $create_view_sql = $self->show_create_view($view_name);
 
-returns create view SQLt like MySQL's 'show create view'.
+returns create view SQL like MySQL's 'show create view'.
 
 =head1 LICENSE
 

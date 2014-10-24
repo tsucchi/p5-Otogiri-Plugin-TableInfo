@@ -34,7 +34,7 @@ returns create table statement like MySQL's 'show create table'.
 
 ## my $create\_view\_sql = $self->show\_create\_view($view\_name);
 
-returns create view SQLt like MySQL's 'show create view'.
+returns create view SQL like MySQL's 'show create view'.
 
 # LICENSE
 
