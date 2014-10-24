@@ -16,11 +16,10 @@ on test => sub {
     requires 'Test::Differences';
     requires 'Test::More';
     requires 'Test::Requires';
-
+    requires 'DBD::SQLite';
 };
 
 on develop => sub {
     requires 'Test::mysqld';
     requires 'Test::PostgreSQL';
-
 };

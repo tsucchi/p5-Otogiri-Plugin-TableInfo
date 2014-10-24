@@ -57,6 +57,7 @@
       },
       "test" : {
          "requires" : {
+            "DBD::SQLite" : "0",
             "Test::Differences" : "0",
             "Test::More" : "0",
             "Test::Requires" : "0"
