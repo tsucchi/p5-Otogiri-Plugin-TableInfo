@@ -8,7 +8,7 @@ use Otogiri::Plugin;
 use DBIx::Inspector;
 use Otogiri::Plugin::TableInfo::Pg;
 
-our $VERSION = "0.02";
+our $VERSION = "0.03";
 
 our @EXPORT = qw(show_tables show_views show_create_table show_create_view desc);
 
