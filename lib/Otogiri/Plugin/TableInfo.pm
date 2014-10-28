@@ -15,7 +15,6 @@ our @EXPORT = qw(show_tables show_views show_create_table show_create_view desc)
 sub show_tables {
     my ($self, $like_regex) = @_;
     my $inspector = DBIx::Inspector->new(dbh => $self->dbh);
-    my @tables = $inspector->tables;
     my @result = map { $_->name } $inspector->tables;
     @result = grep { $_ =~ /$like_regex/ } @result if ( defined $like_regex );
     return @result;
