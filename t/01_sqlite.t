@@ -28,7 +28,12 @@ CREATE TABLE detective (
   toys      TEXT  NOT NULL,
   FOREIGN KEY(person_id) REFERENCES person(id)
 );
+
+CREATE VIEW detective_view AS SELECT id, toys FROM detective;
+
+CREATE VIEW person_view AS SELECT id, name FROM person;
 EOSQL
+
 $db->do($_) for @sql_statements;
 
 subtest 'show_tables(all)', sub {
@@ -44,6 +49,18 @@ subtest 'show_tables(with regex)', sub {
     # @result contains system table.(sqlite_sequence)
     ok( none { $_ eq 'detective' } @result );
     ok( any { $_ eq 'person' }    @result );
+};
+
+subtest 'show_views(all)', sub {
+
+    my @result = sort $db->show_views();
+    is( $result[0], 'detective_view' );
+    is( $result[1], 'person_view' );
+};
+
+subtest 'show_views(with regex)', sub {
+    my @result = $db->show_views(qr/pe/);
+    is_deeply( \@result, ['person_view'] );
 };
 
 subtest 'desc and show_create_table', sub {
@@ -66,8 +83,6 @@ EOSQL
 };
 
 subtest 'show_create_view', sub {
-
-    $db->do('CREATE VIEW detective_view AS SELECT id, toys FROM detective');
 
     my $result = $db->show_create_view('detective_view');
     my $expected = <<EOSQL;

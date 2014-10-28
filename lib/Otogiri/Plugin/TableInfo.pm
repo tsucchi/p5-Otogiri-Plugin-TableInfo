@@ -10,7 +10,7 @@ use Otogiri::Plugin::TableInfo::Pg;
 
 our $VERSION = "0.02";
 
-our @EXPORT = qw(show_tables show_create_table show_create_view desc);
+our @EXPORT = qw(show_tables show_views show_create_table show_create_view desc);
 
 sub show_tables {
     my ($self, $like_regex) = @_;
@@ -20,6 +20,15 @@ sub show_tables {
     @result = grep { $_ =~ /$like_regex/ } @result if ( defined $like_regex );
     return @result;
 }
+
+sub show_views {
+    my ($self, $like_regex) = @_;
+    my $inspector = DBIx::Inspector->new(dbh => $self->dbh);
+    my @result = map { $_->name } $inspector->views;
+    @result = grep { $_ =~ /$like_regex/ } @result if ( defined $like_regex );
+    return @result;
+}
+
 
 sub show_create_table {
     my ($self, $table_name) = @_;
