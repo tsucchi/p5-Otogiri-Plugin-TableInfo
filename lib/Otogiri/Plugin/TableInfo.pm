@@ -117,6 +117,11 @@ parameter C<$like_regex> is optional. If it is passed, table name is filtered by
 
 If C<$like_regex> is not passed, all table_names in current database are returned.
 
+=head2 my @view_names = $self->show_views([$like_regex]);
+
+returns view names in database.
+
+
 =head2 my $create_table_ddl = $self->desc($table_name);
 
 =head2 my $create_table_ddl = $self->show_create_table($table_name);

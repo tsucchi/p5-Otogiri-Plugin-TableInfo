@@ -26,6 +26,10 @@ parameter `$like_regex` is optional. If it is passed, table name is filtered by 
 
 If `$like_regex` is not passed, all table\_names in current database are returned.
 
+## my @view\_names = $self->show\_views(\[$like\_regex\]);
+
+returns view names in database.
+
 ## my $create\_table\_ddl = $self->desc($table\_name);
 
 ## my $create\_table\_ddl = $self->show\_create\_table($table\_name);
