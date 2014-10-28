@@ -21,7 +21,13 @@ sub new {
 sub show_create_view {
     my ($self, $view_name) = @_;
     my ($row) = $self->{table_info}->search_by_sql('SELECT definition FROM pg_views WHERE viewname = ?', [$view_name]);
-    return $row->{definition};
+    my $definition = $row->{definition};
+    if ( defined $definition ) {
+        $definition =~ s/\A\s//;
+        $definition =~ s/\n//g;
+        $definition =~ s/\s{2,}/ /g;
+    }
+    return $definition;
 }
 
 sub show_create_table {
