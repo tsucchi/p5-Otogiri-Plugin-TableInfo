@@ -36,7 +36,7 @@ sub show_create_table {
 
     return if ( !defined $table );
 
-    my $driver_name = $self->{dsn}->{driver};
+    my $driver_name = $self->maker->driver;
 
     if ( $driver_name eq 'mysql' ) {
         my ($row) = $self->search_by_sql("SHOW CREATE TABLE $table_name");
@@ -59,7 +59,7 @@ sub show_create_view {
 
     return if ( !defined $view );
 
-    my $driver_name = $self->{dsn}->{driver};
+    my $driver_name = $self->maker->driver;
 
     if ( $driver_name eq 'mysql' ) {
         my ($row) = $self->search_by_sql("SHOW CREATE VIEW $view_name");
