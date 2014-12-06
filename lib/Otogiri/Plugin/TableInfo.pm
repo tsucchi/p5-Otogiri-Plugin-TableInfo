@@ -7,6 +7,7 @@ use Otogiri;
 use Otogiri::Plugin;
 use DBIx::Inspector;
 use Otogiri::Plugin::TableInfo::Pg;
+use Carp qw();
 
 our $VERSION = "0.03";
 
@@ -49,6 +50,8 @@ sub show_create_table {
         my $pg = Otogiri::Plugin::TableInfo::Pg->new($self);
         return $pg->show_create_table($table_name);
     }
+
+    Carp::carp "unsupported driver : $driver_name";
     return;
 }
 
@@ -72,6 +75,8 @@ sub show_create_view {
         my $pg = Otogiri::Plugin::TableInfo::Pg->new($self);
         return $pg->show_create_view($view_name);
     }
+
+    Carp::carp "unsupported driver : $driver_name";
     return;
 }
 

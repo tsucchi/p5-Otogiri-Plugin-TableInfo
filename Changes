@@ -2,6 +2,8 @@ Revision history for Perl extension Otogiri-Plugin-TableInfo
 
 {{$NEXT}}
 
+    - alert when unsupported driver is used
+
 0.03 2014-10-28T11:15:50Z
 
     - new feature show_views()
