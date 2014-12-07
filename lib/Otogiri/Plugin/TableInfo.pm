@@ -9,7 +9,7 @@ use DBIx::Inspector;
 use Otogiri::Plugin::TableInfo::Pg;
 use Carp qw();
 
-our $VERSION = "0.03";
+our $VERSION = "0.04";
 
 our @EXPORT = qw(show_tables show_views show_create_table show_create_view desc);
 
