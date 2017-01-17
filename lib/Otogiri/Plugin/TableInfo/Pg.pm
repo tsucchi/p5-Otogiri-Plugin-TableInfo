@@ -117,10 +117,12 @@ sub _is_sequence_column {
 
 sub _build_pk_defs {
     my ($self, $table) = @_;
-    my $result = "";
-    for my $column ( $table->primary_key() ) {
-        $result .= "ALTER TABLE ONLY " . $table->name . "\n";
-        $result .= "    ADD CONSTRAINT " . $column->{PG_COLUMN} . " PRIMARY KEY (" . $column->name . ");\n";
+    my @pks = $table->primary_key();
+    my $result = '';
+    if ( @pks ) {
+        my @pk_names = map { $_->name } @pks;
+        $result = "ALTER TABLE ONLY " . $table->name . "\n";
+        $result .= "    ADD CONSTRAINT " . $pks[0]->{PG_COLUMN} . " PRIMARY KEY (" . join(', ', @pk_names) . ");\n";
     }
     return $result;
 }
